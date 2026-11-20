@@ -172,4 +172,16 @@ describe("shared .env text editor", () => {
     );
     expect(field!.querySelector("[data-var]")?.textContent).toBe("${APP_NAME}");
   });
+
+  it("keeps focus in the value field when it is clicked", async () => {
+    await act(async () =>
+      root.render(<Harness initial={[{ key: "APP_NAME", value: "Acme", visible: true }]} />),
+    );
+    const field = host.querySelector<HTMLElement>('[data-env-index="0"] [contenteditable]')!;
+    await act(async () => {
+      field.focus();
+      field.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(document.activeElement).toBe(field);
+  });
 });

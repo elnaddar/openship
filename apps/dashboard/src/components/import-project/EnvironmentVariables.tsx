@@ -683,7 +683,7 @@ const EnvironmentVariables: React.FC<EnvironmentVariablesPropsOptional> = ({
       if (!isEditingMode) return;
 
       const target = e.target as HTMLElement;
-      if (target.closest("input, button, a, select, textarea, label")) {
+      if (target.closest("input, button, a, select, textarea, label, [contenteditable]")) {
         return;
       }
 
