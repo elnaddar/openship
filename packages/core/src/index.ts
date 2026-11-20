@@ -13,6 +13,7 @@ export * from "./compose-namespace";
 export * from "./compose-spec";
 export * from "./container-hosts";
 export * from "./env-file";
+export * from "./env-references";
 export * from "./object-storage";
 export * from "./constants";
 export * from "./shell-split";

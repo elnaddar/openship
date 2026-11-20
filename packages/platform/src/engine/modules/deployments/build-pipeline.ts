@@ -35,6 +35,7 @@ import {
   BUILD_ENV_VARS,
   AppError,
   DeployError,
+  expandEnvReferences,
   safeErrorMessage,
   sanitizeProxySettings,
   normalizeServiceLabel,
@@ -1054,12 +1055,17 @@ async function executeBuildAndDeploy(
     // drops keys that fail decryption rather than leaking ciphertext into
     // the build environment.
     const failedEnvKeys: string[] = [];
-    const envMap = decryptEnvMap(
-      (dep.envVars ?? {}) as Record<string, string>,
-      (key: string, err: unknown) => {
-        failedEnvKeys.push(key);
-        errorDiagnostics.warn("platform/engine/modules/deployments/build-pipeline", `[build] failed to decrypt env var ${key}: ${safeErrorMessage(err)}`);
-      },
+    // Expand `${OTHER_KEY}` references once, before the same map feeds build
+    // args, Compose interpolation and the container: a build-time value such as
+    // VITE_APP_NAME must resolve here, not after the image is already built.
+    const envMap = expandEnvReferences(
+      decryptEnvMap(
+        (dep.envVars ?? {}) as Record<string, string>,
+        (key: string, err: unknown) => {
+          failedEnvKeys.push(key);
+          errorDiagnostics.warn("platform/engine/modules/deployments/build-pipeline", `[build] failed to decrypt env var ${key}: ${safeErrorMessage(err)}`);
+        },
+      ),
     );
     logger.protectSecrets([
       ...Object.values(envMap),

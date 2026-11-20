@@ -12,6 +12,7 @@ import {
   resolveComposeEnvironmentTemplates,
   type ComposeMissingVariable,
 } from "./compose-interpolation";
+import { expandEnvReferences } from "./env-references";
 
 /** The four env layers a compose service is deployed with, before token resolution. */
 export interface ServiceEnvLayers {
@@ -149,7 +150,7 @@ export function mergeServiceDeployEnv(
   const decidedLater = (key: string) =>
     key in layers.service || (frozenWins && key in layers.frozen);
   return {
-    env: dynamic.env,
+    env: expandEnvReferences(dynamic.env),
     deferredEmpty: deferredEmpty.filter((key) => !decidedLater(key)),
     overriddenProjectKeys: [...serviceOwnedKeys]
       .filter(
